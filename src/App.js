@@ -1,26 +1,45 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { ApolloProvider} from "react-apollo";
+import ApolloClient from 'apollo-boost';
+import { Query } from "react-apollo";
+import gql from "graphql-tag";
+import StationListContainer from './container/StationListContainer';
+
+
+const client = new ApolloClient({
+  uri: "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql" //"https://api.digitransit.fi/graphiql/hsl"
+});
 
 class App extends Component {
+
+
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
+      <ApolloProvider client={client}>
+          <Query
+            query={gql`
+              query Stations{
+                bikeRentalStations {
+                  stationId
+                  name
+                  bikesAvailable
+                  spacesAvailable
+                  state
+                  realtime
+                }
+              }
+            `}
           >
-            Learn React
-          </a>
-        </header>
-      </div>
+        {({ loading, error, data }) => {
+          if (loading) return <p>Loading...</p>;
+          if (error) return <p>Oops...</p>;
+            
+          return <StationListContainer stations={data.bikeRentalStations} />
+        }}
+        </Query>
+      </ApolloProvider>
     );
   }
 }
