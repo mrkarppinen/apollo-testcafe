@@ -10,25 +10,26 @@ fixture`List page`
 
 test('filter Items', async t => {
 
-    // initial stations count
-    const stationsCount = await listPage.stations.count;
+    // filter station nodes that doesn't start with
+    const stationsNotStartingBy = (prefix) =>  
+        listPage.stations.filter( node => {
+            return !node.innerText.startsWith(prefix);
+        }, 
+        { prefix }
+    );
+
+    const initialStationsCount = await listPage.stations.count;
+
 
     // filter stations by name
-    await t.typeText(listPage.filterInput, 'T');
-
-    const stationsCountAfterFilter = listPage.stations.count;
-
+    await listPage.filter('T');
+ 
     // verify stations count less than initial count
     // assumes initial list contains items not starting with T
-    await t.expect(stationsCountAfterFilter).lt(stationsCount);
-
-    // filter station nodes that doesn't start with T 
-    const nodes = await listPage.stations.filter( node => {
-            return !node.innerText.startsWith('T');
-    });
+    await t.expect(listPage.stations.count).lt(initialStationsCount);
 
     // should be zero
-    await t.expect(nodes.count).eql(0);
+    await t.expect(stationsNotStartingBy('T').count).eql(0);
 
 });
 
@@ -42,10 +43,10 @@ test('display info', async t => {
     await t.expect(info.count).eql(0);
 
     // open information
-    await t.click(station.title()).wait(500);
+    await t.click(station.title());
 
     // verify correct information is visible
-    await t.expect(info.count).eql(1);
+    await t.expect(info.count).eql(1, {timeout: 500});
     await t.expect(info.id).eql(`info-${stationId}`);
 
 });

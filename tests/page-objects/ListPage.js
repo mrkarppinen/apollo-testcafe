@@ -4,12 +4,16 @@ import { Selector, t } from 'testcafe';
 export default class ListPage {
     constructor(){
         this.stationsContainer = Selector('#stations');
-        this.stations = Selector('#stations .station');
+        this.stations = this.stationsContainer.find('.station');
         this.filterInput = Selector('input[name="filter"]');
     }
 
     getStation(index) {
-        return Promise.resolve(new Station(index));
+        return Promise.resolve(new Station(this.stations.nth(index)));
+    }
+
+    filter(text){
+        return t.typeText(this.filterInput, text);
     }
 
 
@@ -17,8 +21,8 @@ export default class ListPage {
 
 class Station {
 
-    constructor(index){
-        this.container = Selector(`#stations .station:nth-of-type(${++index})`);
+    constructor(container){
+        this.container = container;
     }
 
     id(){
